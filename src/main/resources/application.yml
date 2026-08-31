@@ -1,0 +1,31 @@
+# Default (local development) configuration.
+#
+# Every value below has an environment-variable override so the same file is
+# safe to commit and run anywhere. The defaults are local-only placeholders —
+# never real production credentials. The `prod` profile (application-prod.yml)
+# reads all of these from Render's environment variables instead.
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/campaign_scheduler}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  jackson:
+    default-property-inclusion: non_null
+
+jwt:
+  # Local-only signing key. Override with JWT_SECRET in any deployed environment;
+  # the prod profile requires JWT_SECRET to be set (no fallback leaks this value).
+  secret: ${JWT_SECRET:local-dev-only-change-me-not-for-production}
+  expiration-ms: 86400000
+
+allowed-origin: ${ALLOWED_ORIGIN:http://localhost:3000}

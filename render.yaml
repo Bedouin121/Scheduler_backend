@@ -1,0 +1,58 @@
+# Render Blueprint
+# Defines the web service and its PostgreSQL database as code. Deploy by:
+#   1. Pushing this repository to GitHub and connecting it to Render.
+#   2. Choosing "Blueprint" when creating a new service in the dashboard.
+#
+# Notes:
+#   - ALLOWED_ORIGIN must be set to the deployed frontend origin.
+#   - The Spring profile "prod" reads every secret from environment
+#     variables (see application-prod.yml). JWT_SECRET is generated
+#     automatically on first deploy.
+#   - Database connection is assembled from Render's individual database
+#     fields (DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD) rather than
+#     the combined connection string, so we never parse a raw
+#     postgres://user:pass@host:port/db URL. application-prod.yml builds the
+#     JDBC-style url (jdbc:postgresql://...) from those pieces.
+
+services:
+  - type: web
+    name: campaign-scheduler-backend
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ALLOWED_ORIGIN
+        value: https://your-frontend-domain.vercel.app
+      - key: DB_HOST
+        fromDatabase:
+          name: campaign-scheduler-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: campaign-scheduler-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: campaign-scheduler-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: campaign-scheduler-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: campaign-scheduler-db
+          property: password
+
+databases:
+  - name: campaign-scheduler-db
+    plan: free
+    region: oregon
+    databaseName: campaign_scheduler
+    user: campaign_scheduler
