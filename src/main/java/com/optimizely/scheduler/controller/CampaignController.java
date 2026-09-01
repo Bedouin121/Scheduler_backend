@@ -6,11 +6,11 @@ import com.optimizely.scheduler.entity.User;
 import com.optimizely.scheduler.service.CampaignService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 /**
@@ -20,6 +20,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/campaigns")
 @RequiredArgsConstructor
+@Slf4j
 public class CampaignController {
 
     private final CampaignService campaignService;
@@ -40,6 +41,11 @@ public class CampaignController {
      */
     @GetMapping
     public ResponseEntity<List<CampaignResponse>> list(@AuthenticationPrincipal User user) {
+        if (user == null) {
+            log.warn("GET /api/campaigns called but @AuthenticationPrincipal User is null");
+        } else {
+            log.info("GET /api/campaigns called for user: {}", user.getEmail());
+        }
         return ResponseEntity.ok(campaignService.listByOwner(user));
     }
 
